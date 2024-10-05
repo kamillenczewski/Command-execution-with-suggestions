@@ -30,6 +30,7 @@ class DataInterpreter:
         self.is_collecting_active = False
         self.command_chars = []
         self.keys_amount_after_command_start = 1
+        self.inserting_index = 0
 
         self.enter_pressed = False
 
@@ -39,16 +40,29 @@ class DataInterpreter:
     def interprate(self):
         for key in self.keyboard_data_generator:
             if key == self.COMMAND_START_CHAR:
+                self.reset() 
                 self.is_collecting_active = True
             
             if self.is_collecting_active:
                 match(key):
                     case self.ENTER:
                         self.enter_pressed = True
+
                     case self.BACKSPACE if self.command_chars:
-                        self.command_chars.pop()
+                        self.command_chars.pop(self.inserting_index)
                         self.keys_amount_after_command_start -= 1
-                
+
+                    case self.RIGHT if self.inserting_index + 1 <= len(self.command_chars):
+                        self.inserting_index += 1
+                        
+                    case self.LEFT if self.inserting_index - 1 >= -1:
+                        if self.inserting_index - 1 == -1:
+                            self.is_collecting_active = False
+                            self.inserting_index = 0
+                        else:
+                            self.inserting_index -= 1
+
+                        
                 self.add_key(key)
                 self.update_keys_amount(key)
 
@@ -69,13 +83,14 @@ class DataInterpreter:
             key = ' '
 
         if len(key) == 1:
-            self.command_chars.append(key)
-            print('KEY:', key)
+            self.command_chars.insert(self.inserting_index, key)
+            self.inserting_index += 1
 
     def reset(self):
         self.reset_command_chars()
         self.reset_keys_amount()
         self.is_collecting_active = False
+        self.inserting_index = 0
 
     def get_keys_amount_after_command_start(self):
         return self.keys_amount_after_command_start
@@ -118,8 +133,6 @@ class CommandsExecutor:
     def actual_execute(self, command):
         name, args = command_to_name_and_args(command)
         method = self.get_method(name)
-        print('Name:', name)
-        print('Args:', args)
 
         if method != None:
             if args == None:

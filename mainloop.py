@@ -1,5 +1,8 @@
 from suggestionswindow import ListWidget
-from utils import CommandsExecutor, DataInterpreter, KeyboardDataCollector, command_to_command_name, find_similar_command_to_precommand, remove_entered_command_from_screen
+from utils import (
+    CommandsExecutor, DataInterpreter, KeyboardDataCollector,
+    remove_entered_keys_from_screen, SuggestionsManager
+)
 from typing import Callable, Any
 from time import sleep
 from keyboard import write, send
@@ -10,6 +13,7 @@ class MainLoop:
             collector: KeyboardDataCollector, 
             executor: CommandsExecutor, 
             list_widget: ListWidget, 
+            suggestions_manager: SuggestionsManager,
             commands_and_methods: dict[str, Callable[[Any], Any]],
             delay: float):
         
@@ -19,49 +23,53 @@ class MainLoop:
         self.list_widget = list_widget
         self.delay = delay
         self.commands_and_methods = commands_and_methods
+        self.suggestions_manager = suggestions_manager
         self.command_names = list(self.commands_and_methods.keys())
 
         self.current_precommand = None
 
-    def interprete(self):
-        self.interpreter.put(self.collector.get_all()).interprate()
-
     def start(self):
         while True:
-            self.interprete()
+            self.interpreter.put_data_generator(self.collector.get_all())
+            self.interpreter.interprate()
             
-            commands = self.interpreter.get_commands()
-            keys_amount_history = self.interpreter.get_keys_amount_hisotry() 
             precommand = self.interpreter.get_precommand()
-            
+            keys_amount = self.interpreter.get_keys_amount_after_command_start() 
+            is_enter_pressed = self.interpreter.is_enter_pressed()
+
             self.handle_precommand(precommand)
+            
+            self.write_suggestion(precommand, is_enter_pressed)
 
-            if self.interpreter.enter_pressed:
-                self.interpreter.enter_pressed = False
-                best_suggestion_command = self.list_widget.item(self.list_widget.currentRow()).text()
-                send('backspace')
-                write(best_suggestion_command.removeprefix(command_to_command_name(precommand)))
+            if is_enter_pressed and (')' in precommand or '(' in precommand):
+                remove_entered_keys_from_screen(keys_amount)
+                self.executor.execute(precommand)
+                self.interpreter.reset()     
 
-            self.execute_commands(commands, keys_amount_history)
-                
             sleep(self.delay)
 
     def handle_precommand(self, precommand):
         if precommand != self.current_precommand:
-            self.list_widget.clearItems()
-
             self.current_precommand = precommand
 
-            similiar_commands = find_similar_command_to_precommand(
-                self.command_names, 
-                command_to_command_name(precommand)
-            )
+            self.suggestions_manager.set_precommand(precommand)
+            self.list_widget.updateSuggestions()    
 
-            self.list_widget.addItems(similiar_commands)
-            self.list_widget.setCurrentRow(0)
+            print("PRE:", precommand)
 
-    def execute_commands(self, commands, keys_amount_history):
-        for command, keys_amount in zip(commands, keys_amount_history):
-            remove_entered_command_from_screen(keys_amount)
-            self.executor.execute(command)
+    def write_suggestion(self, precommand, is_enter_pressed):
+        if is_enter_pressed and (')' not in precommand or '(' not in precommand):
+            remove_entered_keys_from_screen(1)
+
+            best_suggestion_item = self.list_widget.item(self.list_widget.currentRow())
+
+            if best_suggestion_item == None:
+                return
             
+            best_suggestion = best_suggestion_item.text()
+            text_to_add = best_suggestion.removeprefix(precommand.replace(' ', '')) + '()'
+
+            print('TExt to add:', text_to_add)
+
+            write(text_to_add)
+            self.interpreter.add_keys_and_update_keys_amount(text_to_add)

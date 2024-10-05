@@ -2,8 +2,10 @@ from PyQt6.QtWidgets import QMainWindow, QListWidget, QListWidgetItem
 from PyQt6.QtGui import QColor, QFont, QCursor
 from PyQt6.QtCore import QSize, Qt, QTimer
 
+from utils import SuggestionsManager
+
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, listWidget: "ListWidget"):
         super(MainWindow, self).__init__()
 
         self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint | 
@@ -13,7 +15,7 @@ class MainWindow(QMainWindow):
 
         self.createTimerToUpdateWindowPosition()
 
-        self.listWidget = ListWidget()
+        self.listWidget = listWidget
         self.setCentralWidget(self.listWidget)
         
         self.windowActions = []
@@ -50,7 +52,7 @@ class MainWindow(QMainWindow):
         self.windowActions.append(exec_cmd)
 
 class ListWidget(QListWidget):
-    def __init__(self) -> None:
+    def __init__(self):
         super(ListWidget, self).__init__()
 
         self.WIDTH = 300
@@ -69,6 +71,8 @@ class ListWidget(QListWidget):
         self.START_BRACKET = '{'
         self.END_BRACKET = '}'
 
+        self.suggestionsManager = None
+
         self.setFixedWidth(self.WIDTH)
         self.setFixedHeight(self.HEIGHT)
    
@@ -78,12 +82,24 @@ class ListWidget(QListWidget):
 
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
-    def addItem(self, string):
-        super().addItem(self.createItem(string))
+    def setSuggestionsManager(self, suggestionsManager: SuggestionsManager):
+        self.suggestionsManager = suggestionsManager
+
+    def updateSuggestions(self):
+        self.clearItems()
+
+        suggestions = self.suggestionsManager.all()
+
+        if suggestions:
+            self.addItems(suggestions)
+            self.setCurrentRow(0)
 
     def addItems(self, strings):
         for string in strings:
             self.addItem(string)
+
+    def addItem(self, string):
+        super().addItem(self.createItem(string))
 
     def clearItems(self):
         for _ in range(self.count()):

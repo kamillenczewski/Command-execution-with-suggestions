@@ -14,9 +14,9 @@ except Exception as e:
 
 from mainloop import MainLoop
 from suggestionswindow import MainWindow, ListWidget
-from utils import KeyboardDataCollector, DataInterpreter, CommandsExecutor, StorageHandler
+from utils import KeyboardDataCollector, DataInterpreter, CommandsExecutor, StorageHandler, SuggestionsManager
 
-from keyboard import write, on_press
+from keyboard import on_press, hook_key
 from threading import Thread
 from PyQt6.QtWidgets import QApplication
 from pynput.mouse import Listener
@@ -28,6 +28,12 @@ def on_scroll(list_widget: ListWidget, _1, _2, _3, dy):
             list_widget.goUp()
         case -1:
             list_widget.goDown()
+
+def on_up_arrow_click(list_widget, event):
+    list_widget.goUp()
+
+def on_down_arrow_click(list_widget, event):
+    list_widget.goDown()
 
 def show_window(window: MainWindow):
     window.addWindowAction('show')
@@ -42,7 +48,8 @@ def start_scroll_event_catcher(method):
     Listener(on_scroll=method).start()
 
 app = QApplication([])
-suggestions_window = MainWindow()
+list_widget = ListWidget()
+suggestions_window = MainWindow(list_widget)
 list_widget = suggestions_window.getListWidget()
 
 collector = KeyboardDataCollector()
@@ -60,12 +67,18 @@ COMMANDS_AND_METHODS = {
 
 MAIN_LOOP_DELAY = 0.1
 
+suggestions_manager = SuggestionsManager(list(COMMANDS_AND_METHODS.keys()))
 executor = CommandsExecutor(commands_and_methods=COMMANDS_AND_METHODS)
+
+list_widget.setSuggestionsManager(suggestions_manager)
 
 start_scroll_event_catcher(partial(on_scroll, list_widget))
 start_press_event_catcher(collector.collect)
 
-mainLoop = MainLoop(interpreter, collector, executor, list_widget, COMMANDS_AND_METHODS, MAIN_LOOP_DELAY)
+hook_key('up', partial(on_up_arrow_click, list_widget), suppress=True)
+hook_key('down', partial(on_down_arrow_click, list_widget), suppress=True)
+
+mainLoop = MainLoop(interpreter, collector, executor, list_widget, suggestions_manager, COMMANDS_AND_METHODS, MAIN_LOOP_DELAY)
 loop_thread = Thread(target=mainLoop.start)
 loop_thread.start()
 

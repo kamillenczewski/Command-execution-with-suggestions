@@ -1,22 +1,22 @@
-try:
-    from pathlib import Path
-    from sys import path
-    from os.path import join as combine_path
+from pathlib import Path
+from sys import path
+from os.path import join as combine_path
 
-    path_to_current_dir = str(Path(__file__).parent.resolve())
+path_to_current_dir = str(Path(__file__).parent.resolve())
 
-    path_to_libs = combine_path(path_to_current_dir, 'venv', 'Lib', 'site-packages')
+path_to_libs = combine_path(path_to_current_dir, 'venv', 'Lib', 'site-packages')
 
-    path.insert(0, path_to_libs)
+path.insert(0, path_to_libs)
 
-except Exception as e:
-    input(str(e))
 
 from mainloop import MainLoop
 from suggestionswindow import MainWindow, ListWidget
-from utils import KeyboardDataCollector, DataInterpreter, CommandsExecutor, StorageHandler, SuggestionsManager
+from utils import (
+    KeyboardDataCollector, DataInterpreter, CommandsExecutor, 
+    StorageHandler, SuggestionsManager
+)
 
-from keyboard import on_press, hook_key, unblock_key, unhook
+from keyboard import on_press
 from threading import Thread
 from PyQt6.QtWidgets import QApplication
 from pynput.mouse import Listener

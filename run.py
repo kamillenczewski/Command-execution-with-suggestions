@@ -16,7 +16,7 @@ from mainloop import MainLoop
 from suggestionswindow import MainWindow, ListWidget
 from utils import KeyboardDataCollector, DataInterpreter, CommandsExecutor, StorageHandler, SuggestionsManager
 
-from keyboard import on_press, hook_key
+from keyboard import on_press, hook_key, unblock_key, unhook
 from threading import Thread
 from PyQt6.QtWidgets import QApplication
 from pynput.mouse import Listener
@@ -28,12 +28,6 @@ def on_scroll(list_widget: ListWidget, _1, _2, _3, dy):
             list_widget.goUp()
         case -1:
             list_widget.goDown()
-
-def on_up_arrow_click(list_widget, event):
-    list_widget.goUp()
-
-def on_down_arrow_click(list_widget, event):
-    list_widget.goDown()
 
 def show_window(window: MainWindow):
     window.addWindowAction('show')
@@ -75,13 +69,9 @@ list_widget.setSuggestionsManager(suggestions_manager)
 start_scroll_event_catcher(partial(on_scroll, list_widget))
 start_press_event_catcher(collector.collect)
 
-hook_key('up', partial(on_up_arrow_click, list_widget), suppress=True)
-hook_key('down', partial(on_down_arrow_click, list_widget), suppress=True)
-
-mainLoop = MainLoop(interpreter, collector, executor, list_widget, suggestions_manager, COMMANDS_AND_METHODS, MAIN_LOOP_DELAY)
+mainLoop = MainLoop(interpreter, collector, executor, list_widget, suggestions_window, COMMANDS_AND_METHODS, MAIN_LOOP_DELAY)
 loop_thread = Thread(target=mainLoop.start)
 loop_thread.start()
 
-suggestions_window.show()
 app.exec()
 loop_thread.join()

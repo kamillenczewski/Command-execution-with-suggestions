@@ -82,6 +82,10 @@ class ListWidget(QListWidget):
 
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
+    def setPrecommand(self, precommand):
+        if self.suggestionsManager != None:
+            self.suggestionsManager.set_precommand(precommand)
+
     def setSuggestionsManager(self, suggestionsManager: SuggestionsManager):
         self.suggestionsManager = suggestionsManager
 

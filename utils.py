@@ -1,6 +1,3 @@
-from time import sleep
-# from pyperclip import paste as paste_from_clipboard
-# copying to clipboard - putting data in collector and execution
 from collections import deque
 from keyboard import send, write
 

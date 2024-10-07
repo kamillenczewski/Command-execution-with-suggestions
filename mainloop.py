@@ -69,6 +69,8 @@ class MainLoop:
                 self.unhook_and_unblock_up_arrow()
                 self.unhook_and_unblock_down_arrow()
 
+            # print(self.interpreter.command_chars)
+
             sleep(self.delay)
 
     def hook_and_supress_up_arrow(self):
@@ -90,7 +92,7 @@ class MainLoop:
             self.list_widget.setPrecommand(precommand)
             self.list_widget.updateSuggestions()    
 
-            print("PRE:", precommand)
+            # print("PRE:", precommand)
 
     def write_suggestion(self, precommand, is_enter_pressed, is_tab_pressed):
         if (is_enter_pressed or is_tab_pressed) and (')' not in precommand or '(' not in precommand):
@@ -102,7 +104,8 @@ class MainLoop:
                 return
             
             best_suggestion = best_suggestion_item.text()
-            text_to_add = best_suggestion.removeprefix(precommand.replace(' ', '')) + '()'
+            text_to_add = best_suggestion.removeprefix(precommand.replace(' ', '')) + '('
 
             write(text_to_add)
             self.interpreter.add_keys_and_update_keys_amount(text_to_add)
+            

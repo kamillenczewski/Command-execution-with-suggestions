@@ -33,11 +33,19 @@ class DataInterpreter:
         self.enter_pressed = False
         self.tab_pressed = False
 
+        self.current_key = None
+
     def put_data_generator(self, keyboard_data_generator):
         self.keyboard_data_generator = keyboard_data_generator
 
     def interprate(self):
         for key in self.keyboard_data_generator:
+            # variable 'added' is really ugly here
+            # but I tried to solve problem with inserting index
+
+            self.current_key = key
+            added = False
+
             if key == self.COMMAND_START_CHAR:
                 self.reset() 
                 self.collecting_activity = True
@@ -50,11 +58,10 @@ class DataInterpreter:
                     case self.TAB:
                         self.tab_pressed = True
 
-                    case self.BACKSPACE if self.command_chars:
-                        # while self.inserting_index + 1 >= len(self.command_chars):
-                        #     self.inserting_index -= 1
-                        print('len:', len(self.command_chars), 'index:', self.inserting_index)
-                        self.command_chars.pop(self.inserting_index)
+                    case self.BACKSPACE if self.command_chars:    
+                        # print('len:', len(self.command_chars), 'index:', self.inserting_index)
+                        self.command_chars.pop(self.inserting_index - 1)
+                        self.decrease_inserting_index()
                         self.keys_amount_after_command_start -= 1
 
                     case self.RIGHT if self.inserting_index + 1 <= len(self.command_chars):
@@ -63,20 +70,38 @@ class DataInterpreter:
                     case self.LEFT if self.inserting_index - 1 >= -1:
                         if self.inserting_index - 1 == -1:
                             self.collecting_activity = False
-                            self.inserting_index = 0
+                            self.reset_inserting_index()
                         else:
-                            self.inserting_index -= 1
+                            self.decrease_inserting_index()
 
-                        
-                self.add_key(key)
-                self.update_keys_amount(key)
+                            self.add_key(key)
+                            self.update_keys_amount(key)
+                            added = True
+                            
+                            self.increase_inserting_index()
+
+                            # print('LEFT')
+
+                if not added:
+                    self.add_key(key)
+                    self.update_keys_amount(key)
+
+    def increase_inserting_index(self):
+        self.inserting_index += 1
+        # print('increase', 'index:', self.inserting_index, 'key:', self.current_key, 'chars', self.command_chars)
+
+    def decrease_inserting_index(self):
+        self.inserting_index -= 1
+        # print('decrease', 'index:', self.inserting_index, 'key:', self.current_key)
+
+    def reset_inserting_index(self):
+        self.inserting_index = 0
+        # print('reset', 'index:', self.inserting_index, 'key:', self.current_key)
 
     def add_keys_and_update_keys_amount(self, keys):
         for key in keys:
             self.add_key(key)
             self.update_keys_amount(key)
-
-        self.inserting_index -= 1
 
     def update_keys_amount(self, key):
         if (len(key) == 1 and key != self.COMMAND_START_CHAR) or key in {self.ENTER, self.SPACE}:
@@ -90,13 +115,9 @@ class DataInterpreter:
             key = ' '
 
         if len(key) == 1:
+            self.current_key = key
             self.increase_inserting_index()
             self.command_chars.insert(self.inserting_index, key) 
-
-    def increase_inserting_index(self):
-        # print('len:', len(self.command_chars), 'index:', self.inserting_index)
-
-        self.inserting_index += 1
 
     def reset(self):
         self.reset_command_chars()
@@ -182,7 +203,6 @@ class StorageHandler:
 
     def getall(self):
         write(str(self.storage))
-        print('xdddd dd')
 
 class SuggestionsManager:
     def __init__(self, possible_commands) -> None:

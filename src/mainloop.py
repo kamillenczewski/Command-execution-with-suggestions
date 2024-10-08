@@ -1,12 +1,16 @@
 from suggestionswindow import ListWidget, MainWindow
-from utils import (
-    CommandsExecutor, DataInterpreter, KeyboardDataCollector,
-    remove_entered_keys_from_screen
-)
+from commandsexecutor import CommandsExecutor
+from datainterpreter import DataInterpreter
+from keyboarddatacollector import KeyboardDataCollector
+
 from typing import Callable, Any
 from time import sleep
-from keyboard import write, hook_key, unhook
+from keyboard import write, hook_key, unhook, send
 from functools import partial
+
+def remove_entered_keys_from_screen(keys_amount):
+    string = ','.join(['backspace'] * keys_amount)
+    send(string)   
 
 def on_up_arrow_click(list_widget, event):
     list_widget.goUp()

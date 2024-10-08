@@ -2,19 +2,26 @@ from pathlib import Path
 from sys import path
 from os.path import join as combine_path
 
-path_to_current_dir = str(Path(__file__).parent.resolve())
+try:
+    path_to_current_file = Path(__file__)
+    path_to_current_folder = path_to_current_file.parent
+    path_to_main_folder = path_to_current_folder.parent
 
-path_to_libs = combine_path(path_to_current_dir, 'venv', 'Lib', 'site-packages')
+    path_to_libs = combine_path(path_to_main_folder, 'venv', 'Lib', 'site-packages')
 
-path.insert(0, path_to_libs)
+    path.insert(0, path_to_libs)
+    
+except Exception as e:
+    input(e)
 
 
 from mainloop import MainLoop
 from suggestionswindow import MainWindow, ListWidget
-from utils import (
-    KeyboardDataCollector, DataInterpreter, CommandsExecutor, 
-    StorageHandler, SuggestionsManager
-)
+from keyboarddatacollector import KeyboardDataCollector
+from datainterpreter import DataInterpreter
+from commandsexecutor import CommandsExecutor
+from storagehandler import StorageHandler
+from suggestionsmanager import SuggestionsManager
 
 from keyboard import on_press
 from threading import Thread

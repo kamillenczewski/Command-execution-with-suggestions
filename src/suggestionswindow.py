@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import QMainWindow, QListWidget, QListWidgetItem
 from PyQt6.QtGui import QColor, QFont, QCursor
 from PyQt6.QtCore import QSize, Qt, QTimer
 
-from utils import SuggestionsManager
+from suggestionsmanager import SuggestionsManager
 
 class MainWindow(QMainWindow):
     def __init__(self, listWidget: "ListWidget"):

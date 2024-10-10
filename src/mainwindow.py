@@ -47,6 +47,8 @@ class MainWindow(QMainWindow):
                     super().hide()
                 case 'show':
                     super().show()
+                case 'close':
+                    super().close()
 
     def addWindowAction(self, exec_cmd):
         self.windowActions.append(exec_cmd)
@@ -63,3 +65,6 @@ class MainWindow(QMainWindow):
 
     def show(self):
         self.addWindowAction('show')
+
+    def close(self):
+        self.addWindowAction('close')

@@ -27,15 +27,7 @@ from suggestionsmanager import SuggestionsManager
 from keyboard import on_press
 from threading import Thread
 from PyQt6.QtWidgets import QApplication
-from pynput.mouse import Listener
 from functools import partial
-
-def on_scroll(list_widget: ListWidget, _1, _2, _3, dy):
-    match(dy):
-        case 1:
-            list_widget.goUp()
-        case -1:
-            list_widget.goDown()
 
 def activate_window(window: MainWindow):
     window.activate()
@@ -43,11 +35,12 @@ def activate_window(window: MainWindow):
 def deactivate_window(window: MainWindow):
     window.deactivate()
 
+def close_window(window: MainWindow, thread):
+    window.close()
+    thread.join()
+
 def start_press_event_catcher(method):
     on_press(method)
-
-def start_scroll_event_catcher(method):
-    Listener(on_scroll=method).start()
 
 app = QApplication([])
 list_widget = ListWidget()
@@ -64,7 +57,8 @@ COMMANDS_AND_METHODS = {
     'set': storage_handler.set,
     'getall': storage_handler.getall,
     'activate': partial(activate_window, suggestions_window),
-    'deactivate': partial(deactivate_window, suggestions_window)
+    'deactivate': partial(deactivate_window, suggestions_window)#,
+    #'close': partial(close_window, suggestions_window)
 }
 
 MAIN_LOOP_DELAY = 0.1
@@ -74,11 +68,12 @@ executor = CommandsExecutor(commands_and_methods=COMMANDS_AND_METHODS)
 
 list_widget.setSuggestionsManager(suggestions_manager)
 
-# start_scroll_event_catcher(partial(on_scroll, list_widget))
 start_press_event_catcher(collector.collect)
 
 mainLoop = MainLoop(interpreter, collector, executor, list_widget, suggestions_window, COMMANDS_AND_METHODS, MAIN_LOOP_DELAY)
 loop_thread = Thread(target=mainLoop.start)
+#COMMANDS_AND_METHODS['close'] = partial(close_window, suggestions_window, loop_thread)
+
 loop_thread.start()
 
 app.exec()

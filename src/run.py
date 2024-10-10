@@ -1,8 +1,8 @@
-from pathlib import Path
-from sys import path
-from os.path import join as combine_path
-
 try:
+    from pathlib import Path
+    from sys import path
+    from os.path import join as combine_path
+
     path_to_current_file = Path(__file__)
     path_to_current_folder = path_to_current_file.parent
     path_to_main_folder = path_to_current_folder.parent
@@ -16,7 +16,8 @@ except Exception as e:
 
 
 from mainloop import MainLoop
-from suggestionswindow import MainWindow, ListWidget
+from listwidget import ListWidget
+from mainwindow import MainWindow
 from keyboarddatacollector import KeyboardDataCollector
 from datainterpreter import DataInterpreter
 from commandsexecutor import CommandsExecutor
@@ -73,7 +74,7 @@ executor = CommandsExecutor(commands_and_methods=COMMANDS_AND_METHODS)
 
 list_widget.setSuggestionsManager(suggestions_manager)
 
-start_scroll_event_catcher(partial(on_scroll, list_widget))
+# start_scroll_event_catcher(partial(on_scroll, list_widget))
 start_press_event_catcher(collector.collect)
 
 mainLoop = MainLoop(interpreter, collector, executor, list_widget, suggestions_window, COMMANDS_AND_METHODS, MAIN_LOOP_DELAY)

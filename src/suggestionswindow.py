@@ -17,10 +17,11 @@ class MainWindow(QMainWindow):
 
         self.listWidget = listWidget
         self.setCentralWidget(self.listWidget)
-        
-        self.windowActions = []
 
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+
+        self.windowActions = []
+        self.is_active = True
 
     def getListWidget(self) -> "ListWidget":
         return self.listWidget
@@ -31,8 +32,9 @@ class MainWindow(QMainWindow):
         self.timer.start(self.TIMER_DELAY)
 
     def windowTimerLoop(self):
-        self.updateCursorPosition()
-        self.executeWindowActions()
+        if self.is_active:
+            self.updateCursorPosition()
+            self.executeWindowActions()
 
     def updateCursorPosition(self):
         if self.isVisible():
@@ -50,6 +52,13 @@ class MainWindow(QMainWindow):
 
     def addWindowAction(self, exec_cmd):
         self.windowActions.append(exec_cmd)
+
+    def activate(self):
+        self.is_active = True
+    
+    def deactivate(self):
+        self.hide()
+        self.is_active = False
 
 class ListWidget(QListWidget):
     def __init__(self):

@@ -36,11 +36,11 @@ def on_scroll(list_widget: ListWidget, _1, _2, _3, dy):
         case -1:
             list_widget.goDown()
 
-def show_window(window: MainWindow):
-    window.addWindowAction('show')
+def activate_window(window: MainWindow):
+    window.activate()
 
-def hide_window(window: MainWindow):
-    window.addWindowAction('hide')
+def deactivate_window(window: MainWindow):
+    window.deactivate()
 
 def start_press_event_catcher(method):
     on_press(method)
@@ -62,8 +62,8 @@ COMMANDS_AND_METHODS = {
     'get': storage_handler.get,
     'set': storage_handler.set,
     'getall': storage_handler.getall,
-    'show': partial(show_window, suggestions_window),
-    'hide': partial(hide_window, suggestions_window)
+    'activate': partial(activate_window, suggestions_window),
+    'deactivate': partial(deactivate_window, suggestions_window)
 }
 
 MAIN_LOOP_DELAY = 0.1

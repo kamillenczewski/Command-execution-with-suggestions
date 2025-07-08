@@ -1,6 +1,6 @@
 class DataInterpreter:
-    def __init__(self):
-        self.COMMAND_START_CHAR = '@'
+    def __init__(self, command_start_char='@'):
+        self.COMMAND_START_CHAR = command_start_char
         self.ENTER = 'enter'
         self.TAB = 'tab'
         self.BACKSPACE = 'backspace'

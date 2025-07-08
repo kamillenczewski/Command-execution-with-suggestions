@@ -67,8 +67,12 @@ class MainLoop:
 
         self.up_down_iterator = UpDownIterator(self.list_widget)
 
+        self.is_active = False
+
     def start(self):
-        while True:
+        self.activate()
+
+        while self.is_active:
             data = self.collector.get_all()
             self.interpreter.put_data_generator(data)
             self.interpreter.interprate()
@@ -179,3 +183,8 @@ class MainLoop:
             write(text_to_add)
             self.interpreter.add_keys_and_update_keys_amount(text_to_add)
             
+    def activate(self):
+        self.is_active = True
+
+    def deactivate(self):
+        self.is_active = False

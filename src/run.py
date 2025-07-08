@@ -35,20 +35,23 @@ def activate_window(window: MainWindow):
 def deactivate_window(window: MainWindow):
     window.deactivate()
 
-def close_window(window: MainWindow, thread):
+def close_program(window: MainWindow, main_loop: MainLoop):
     window.close()
-    thread.join()
+    main_loop.deactivate()
+    exit()
 
 def start_press_event_catcher(method):
     on_press(method)
 
+COMMAND_START_CHAR = '@'
+MAIN_LOOP_DELAY = 0.1
+
 app = QApplication([])
 list_widget = ListWidget()
 suggestions_window = MainWindow(list_widget)
-list_widget = suggestions_window.getListWidget()
 
 collector = KeyboardDataCollector()
-interpreter = DataInterpreter()
+interpreter = DataInterpreter(COMMAND_START_CHAR)
 
 storage_handler = StorageHandler()
 
@@ -57,22 +60,20 @@ COMMANDS_AND_METHODS = {
     'set': storage_handler.set,
     'getall': storage_handler.getall,
     'activate': partial(activate_window, suggestions_window),
-    'deactivate': partial(deactivate_window, suggestions_window)#,
-    #'close': partial(close_window, suggestions_window)
+    'deactivate': partial(deactivate_window, suggestions_window)
 }
 
-MAIN_LOOP_DELAY = 0.1
-
-suggestions_manager = SuggestionsManager(list(COMMANDS_AND_METHODS.keys()))
+suggestions_manager = SuggestionsManager(COMMANDS_AND_METHODS)
 executor = CommandsExecutor(commands_and_methods=COMMANDS_AND_METHODS)
 
 list_widget.setSuggestionsManager(suggestions_manager)
 
 start_press_event_catcher(collector.collect)
 
-mainLoop = MainLoop(interpreter, collector, executor, list_widget, suggestions_window, COMMANDS_AND_METHODS, MAIN_LOOP_DELAY)
-loop_thread = Thread(target=mainLoop.start)
-#COMMANDS_AND_METHODS['close'] = partial(close_window, suggestions_window, loop_thread)
+main_loop = MainLoop(interpreter, collector, executor, list_widget, suggestions_window, COMMANDS_AND_METHODS, MAIN_LOOP_DELAY)
+loop_thread = Thread(target=main_loop.start)
+
+COMMANDS_AND_METHODS['close'] = partial(close_program, suggestions_window, main_loop)
 
 loop_thread.start()
 

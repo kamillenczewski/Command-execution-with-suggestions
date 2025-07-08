@@ -1,0 +1,2 @@
+# from pyperclip import paste as paste_from_clipboard
+# copying to clipboard - putting data in collector and execution

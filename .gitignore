@@ -1,4 +1,2 @@
-src/experiment.py
 venv/
-src/__pycache__/
-ideas.txt
+__pycache__/
